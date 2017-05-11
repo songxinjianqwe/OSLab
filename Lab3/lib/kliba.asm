@@ -22,7 +22,7 @@ global	enable_irq
 global	disable_irq
 global	enable_int
 global	disable_int
-
+global  read_display_memory
 
 
 ; ========================================================================
@@ -100,6 +100,34 @@ disp_color_str:
 
 	pop	ebp
 	ret
+
+;==========================================================================
+;void read_display_memory(int begin_position,int end_position,char * dest)
+;========================================================================
+read_display_memory:
+    push ebp
+    mov	ebp, esp
+
+    mov	esi, [ebp + 8] ; start position
+    mov edx, [ebp + 12] ; end position
+    mov	edi, [ebp + 16]	;destination
+
+.1:
+    cmp esi,edx
+    je .2
+    mov ax,[gs:esi]
+    mov [edi],ax
+    add esi,2
+    mov edi,2
+    jmp .1
+
+.2:
+    pop	ebp
+	ret
+
+
+
+
 
 ; ========================================================================
 ;		   void out_byte(u16 port, u8 value);
