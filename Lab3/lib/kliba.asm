@@ -118,7 +118,7 @@ read_display_memory:
     mov ax,[gs:esi]
     mov [edi],ax
     add esi,2
-    mov edi,2
+    add edi,2
     jmp .1
 
 .2:
