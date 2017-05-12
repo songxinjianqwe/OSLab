@@ -9,14 +9,13 @@
 #include "keyboard.h"
 #include "global.h"
 
-
 PUBLIC void clearScreen();
 
 PRIVATE void set_cursor(int position);
 
 PRIVATE void printSpecialChar(char ch);
 
-PRIVATE void remoteColorChars(char * str,int size);
+PRIVATE void removeColorChars(char * str,int size);
 
 PRIVATE void doQuery(int query_str_begin_index,int query_str_end_index);
 
@@ -54,7 +53,11 @@ PUBLIC void task_tty() {
     }
 }
 
-
+/**
+ * process each character
+ * @param key
+ * @return
+ */
 PUBLIC void in_process(u32 key) {
     char output[2] = {'\0', '\0'};
     //if key is printable,then print it
@@ -88,7 +91,9 @@ PUBLIC void in_process(u32 key) {
                 }
                 break;
             case BACKSPACE:
-                printSpecialChar('\b');
+                if(disp_pos > 0){
+                    printSpecialChar('\b');
+                }
                 break;
             case TAB:
                 printSpecialChar('\t');
@@ -131,7 +136,7 @@ PUBLIC void clearScreen() {
 }
 
 /**
- *
+ * set cursor to specific position,based on char(2 bytes)
  * @param position
  * @return
  */
@@ -174,7 +179,12 @@ PRIVATE void printSpecialChar(char ch) {
     }
 }
 
-
+/**
+ * mark input text with color
+ * @param query_str_begin_index
+ * @param query_str_end_index
+ * @return
+ */
 PRIVATE void doQuery(int query_str_begin_index,int query_str_end_index){
     getStrFromDisplayMemory(queryStr,query_str_begin_index,query_str_end_index);
     getStrFromDisplayMemory(text,0,query_str_begin_index);
@@ -189,26 +199,47 @@ PRIVATE void doQuery(int query_str_begin_index,int query_str_end_index){
     disp_pos = original_disp_pos;
 }
 
-
+/**
+ * mark color for a string
+ * @param display_begin_position
+ * @param str
+ * @param color
+ * @return
+ */
 PRIVATE void markColor(int display_begin_position,char * str,int color){
     char output[2] = {'\0', '\0'};
     disp_pos = display_begin_position;
     disp_color_str(str,color);
 }
 
-
+/**
+ * read display memory to main memory and remove
+ * @param str
+ * @param begin
+ * @param end
+ * @return
+ */
 PRIVATE void getStrFromDisplayMemory(char * str,int begin, int end) {
     read_display_memory(begin, end, str);
-    remoteColorChars(str,end-begin);
+    removeColorChars(str,end-begin);
 }
 
+/**
+ * recover input text to original color
+ * @return
+ */
 PRIVATE void recoverColor(){
     disp_pos = 0;
     disp_str(text);
 }
 
-
-PRIVATE void remoteColorChars(char * str,int size){
+/**
+ * remove color chars from display memory
+ * @param str
+ * @param size
+ * @return
+ */
+PRIVATE void removeColorChars(char * str,int size){
     int index = 0;
     for(int i = 0; i < size;i+=2){
         str[index++] = str[i];
@@ -216,7 +247,13 @@ PRIVATE void remoteColorChars(char * str,int size){
     str[index] = '\0';
 }
 
-
+/**
+ * compare first cmpSize of s1 and s2 ,if s1 == s2,return 0; else ,return -1
+ * @param s1
+ * @param s2
+ * @param cmpSize
+ * @return
+ */
 PRIVATE int  strcmp(char * s1, char * s2, int cmpSize) {
     int i = 0;
     while (s1[i] != '\0' && s2[i] != '\0' && i < cmpSize) {
@@ -228,7 +265,13 @@ PRIVATE int  strcmp(char * s1, char * s2, int cmpSize) {
     return 0;
 }
 
-
+/**
+ * find the first index of target string in source string
+ * @param src
+ * @param target
+ * @param targetSize
+ * @return
+ */
 PRIVATE int indexOf(char * src, char *target, int targetSize) {
     int i = 0;
     while (src[i] != '\0') {
