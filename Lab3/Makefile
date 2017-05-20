@@ -42,7 +42,8 @@ everything : $(ORANGESBOOT) $(ORANGESKERNEL)
 all : realclean everything
 
 image : realclean everything clean buildimg
-
+run : image
+	bochs -f bochsrc
 clean :
 	rm -f $(OBJS)
 
