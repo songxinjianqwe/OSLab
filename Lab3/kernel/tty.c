@@ -15,17 +15,17 @@ PRIVATE void set_cursor(int position);
 
 PRIVATE void printSpecialChar(char ch);
 
-PRIVATE void removeColorChars(char * str,int size);
+PRIVATE void removeColorChars(char *str, int size);
 
-PRIVATE void doQuery(int query_str_begin_index,int query_str_end_index);
+PRIVATE void doQuery(int query_str_begin_index, int query_str_end_index);
 
-PRIVATE void getStrFromDisplayMemory(char * str,int begin, int end);
+PRIVATE void getStrFromDisplayMemory(char *str, int begin, int end);
 
-PRIVATE int  strcmp(char * s1, char * s2, int cmpSize);
+PRIVATE int strcmp(char *s1, char *s2, int cmpSize);
 
-PRIVATE int indexOf(char * src, char *target, int targetSize);
+PRIVATE int indexOf(char *src, char *target, int targetSize);
 
-PRIVATE void markColor(int display_begin_position,char * str,int color);
+PRIVATE void markColor(int display_begin_position, char *str, int color);
 
 PRIVATE void recoverColor();
 
@@ -80,18 +80,19 @@ PUBLIC void in_process(u32 key) {
         int raw_key = key & MASK_RAW;
         switch (raw_key) {
             case ENTER:
-                if(NORMAL_MODE){
+                if (NORMAL_MODE) {
                     printSpecialChar('\n');
-                }else  if (!NORMAL_MODE && has_entered_in_query_mode == 0) {
+                    //if current mode is query mode and has not  type `enter` 
+                } else if (!NORMAL_MODE && has_entered_in_query_mode == 0) {
                     int curr_pos = disp_pos;
-                    printSpecialChar('\n');
                     //do query
-                    doQuery(query_mode_start_pos,curr_pos);
+                    doQuery(query_mode_start_pos, curr_pos);
+                    //has typed `enter`
                     has_entered_in_query_mode = 1;
                 }
                 break;
             case BACKSPACE:
-                if(disp_pos > 0){
+                if (disp_pos > 0) {
                     printSpecialChar('\b');
                 }
                 break;
@@ -104,12 +105,15 @@ PUBLIC void in_process(u32 key) {
                     output[0] = ' ';
                     int current_pos = disp_pos;
                     disp_pos = query_mode_start_pos;
+                    //clear query string
                     for (int i = 0; i < (current_pos - query_mode_start_pos) / 2; ++i) {
                         disp_str(output);
                     }
+                    //reset the original output 
                     recoverColor();
+                    //reset global variables
                     disp_pos = query_mode_start_pos;
-                    set_cursor(disp_pos/2);
+                    set_cursor(disp_pos / 2);
                     has_entered_in_query_mode = 0;
                     query_mode_start_pos = -1;
                 }
@@ -185,15 +189,16 @@ PRIVATE void printSpecialChar(char ch) {
  * @param query_str_end_index
  * @return
  */
-PRIVATE void doQuery(int query_str_begin_index,int query_str_end_index){
-    getStrFromDisplayMemory(queryStr,query_str_begin_index,query_str_end_index);
-    getStrFromDisplayMemory(text,0,query_str_begin_index);
-    int cmpLen = (query_str_end_index-query_str_begin_index)/2;
+PRIVATE void doQuery(int query_str_begin_index, int query_str_end_index) {
+    getStrFromDisplayMemory(queryStr, query_str_begin_index, query_str_end_index);
+    getStrFromDisplayMemory(text, 0, query_str_begin_index);
+    int cmpLen = (query_str_end_index - query_str_begin_index) / 2;
     int baseIndex = 0;
     int relativeIndex = 0;
     int original_disp_pos = disp_pos;
+    
     while ((relativeIndex = indexOf(text + baseIndex, queryStr, cmpLen)) != -1) {
-        markColor((baseIndex+relativeIndex)*2,queryStr,QUERY_CHAR_COLOR);
+        markColor((baseIndex + relativeIndex) * 2, queryStr, QUERY_CHAR_COLOR);
         baseIndex += (cmpLen + relativeIndex);
     }
     disp_pos = original_disp_pos;
@@ -206,10 +211,10 @@ PRIVATE void doQuery(int query_str_begin_index,int query_str_end_index){
  * @param color
  * @return
  */
-PRIVATE void markColor(int display_begin_position,char * str,int color){
+PRIVATE void markColor(int display_begin_position, char *str, int color) {
     char output[2] = {'\0', '\0'};
     disp_pos = display_begin_position;
-    disp_color_str(str,color);
+    disp_color_str(str, color);
 }
 
 /**
@@ -219,16 +224,16 @@ PRIVATE void markColor(int display_begin_position,char * str,int color){
  * @param end
  * @return
  */
-PRIVATE void getStrFromDisplayMemory(char * str,int begin, int end) {
+PRIVATE void getStrFromDisplayMemory(char *str, int begin, int end) {
     read_display_memory(begin, end, str);
-    removeColorChars(str,end-begin);
+    removeColorChars(str, end - begin);
 }
 
 /**
  * recover input text to original color
  * @return
  */
-PRIVATE void recoverColor(){
+PRIVATE void recoverColor() {
     disp_pos = 0;
     disp_str(text);
 }
@@ -239,9 +244,9 @@ PRIVATE void recoverColor(){
  * @param size
  * @return
  */
-PRIVATE void removeColorChars(char * str,int size){
+PRIVATE void removeColorChars(char *str, int size) {
     int index = 0;
-    for(int i = 0; i < size;i+=2){
+    for (int i = 0; i < size; i += 2) {
         str[index++] = str[i];
     }
     str[index] = '\0';
@@ -254,7 +259,7 @@ PRIVATE void removeColorChars(char * str,int size){
  * @param cmpSize
  * @return
  */
-PRIVATE int  strcmp(char * s1, char * s2, int cmpSize) {
+PRIVATE int strcmp(char *s1, char *s2, int cmpSize) {
     int i = 0;
     while (s1[i] != '\0' && s2[i] != '\0' && i < cmpSize) {
         if (s1[i] != s2[i]) {
@@ -272,7 +277,7 @@ PRIVATE int  strcmp(char * s1, char * s2, int cmpSize) {
  * @param targetSize
  * @return
  */
-PRIVATE int indexOf(char * src, char *target, int targetSize) {
+PRIVATE int indexOf(char *src, char *target, int targetSize) {
     int i = 0;
     while (src[i] != '\0') {
         if (strcmp(src + i, target, targetSize) == 0) {
