@@ -12,10 +12,14 @@
 #include "string.h"
 #include "proc.h"
 #include "global.h"
+#include "semaphore.h"
 
-
-PRIVATE void clearScreen();
 PRIVATE void setCursor();
+PRIVATE void initProcess();
+void barber();
+void customer(int customer_id,int color);
+void cut_hair();
+void get_haircut(int color);
 
 /*======================================================================*
                             kernel_main
@@ -64,12 +68,6 @@ PUBLIC int kernel_main()
 		selector_ldt += 1 << 3;
 	}
 
-    for(PROCESS * p = proc_table;p < proc_table + NR_TASKS;++p){
-        p->sleeping = 0;
-        p->ticks = 1;
-        p->priority = 1;
-    }
-
 	k_reenter = 0;
 	ticks = 0;
 
@@ -83,14 +81,14 @@ PUBLIC int kernel_main()
         put_irq_handler(CLOCK_IRQ, clock_handler); /* 设定时钟中断处理程序 */
         enable_irq(CLOCK_IRQ);                     /* 让8259A可以接收时钟中断 */
 
-
+    initProcess();
 	clearScreen();
 	restart();
 
 	while(1){}
 }
 
-PRIVATE void clearScreen(){
+PUBLIC void clearScreen(){
 	disp_pos=0;
 	for(int i=0; i < 80 * 25;i++){
 		disp_str(" ");
@@ -106,7 +104,87 @@ PRIVATE void setCursor() {
 	out_byte(CRTC_DATA_REG, (disp_pos/2) & 0xFF);
 }
 
+/**************************************************************************************************************/
 
+int waiting = 0;
+Semaphore customers;
+Semaphore barbers;
+Semaphore mutex;
+
+Queue customers_queue;
+Queue barbers_queue;
+Queue mutex_queue;
+
+PRIVATE void initProcess(){
+    for(PROCESS * p = proc_table;p < proc_table + NR_TASKS;++p){
+        p->sleeping = 0;
+        p->ticks = 1;
+        p->priority = 1;
+    }
+	proc_table[1].ticks = proc_table[1].priority = 2;
+
+    initSemaphore(&customers,0,&customers_queue);
+    initSemaphore(&barbers,0,&barbers_queue);
+	initSemaphore(&mutex,1,&mutex_queue);
+    waiting = 0;
+}
+
+void barber(){
+	while(1){
+		//print current situation
+//		sem_p(&mutex);
+		if(customers.value < 1){
+			disp_str_with_color("No Customers,Barber is sleeping",BARBER_CHAR_COLOR);
+			disp_str_with_color("\n",BARBER_CHAR_COLOR);
+		}
+//		sem_v(&mutex);
+
+		sem_p(&customers);
+		sem_p(&mutex);
+		waiting--;
+		sem_v(&barbers);
+		sem_v(&mutex);
+		cut_hair();
+	}
+}
+
+void customer(int customer_id,int color){
+	while(1){
+		process_sleep(customer_id * 1000);
+		sem_p(&mutex);
+
+		if(waiting < CHAIRS){
+			waiting++;
+
+			disp_str_with_color(p_proc_ready->p_name,color);
+			disp_str_with_color(" is waiting",color);
+			disp_str_with_color("\n",BARBER_CHAR_COLOR);
+			sem_v(&customers);
+			sem_v(&mutex);
+			sem_p(&barbers);
+			get_haircut(color);
+		}else{
+			disp_str_with_color(p_proc_ready->p_name,color);
+			disp_str_with_color(" come and leave",color);
+			disp_str_with_color("\n",BARBER_CHAR_COLOR);
+			sem_v(&mutex);
+		}
+		p_proc_ready->sleeping = MAX_SLEEP_TIME;
+	}
+}
+
+void cut_hair(){
+	disp_str_with_color("Barber is cutting hair\n",BARBER_CHAR_COLOR);
+    disp_str_with_color("\n",BARBER_CHAR_COLOR);
+    process_sleep(2000);
+}
+
+void get_haircut(int color){
+	disp_str_with_color(p_proc_ready->p_name,color);
+	disp_str_with_color(" got haircut",color);
+	disp_str_with_color("\n",color);
+	process_sleep(2000);
+}
 
 /*======================================================================*
                                Normal_Proc
@@ -124,10 +202,7 @@ void Normal_Proc()
  *======================================================================*/
 void Barber()
 {
-	while(1){
-        disp_str_with_color("B.",BARBER_CHAR_COLOR);
-        process_sleep(1000);
-	}
+	barber();
 }
 
 /*======================================================================*
@@ -135,10 +210,7 @@ void Barber()
  *======================================================================*/
 void Customer_C()
 {
-	while(1){
-		disp_str_with_color("C.",CUSTOMER_CHAR_COLOR);
-        process_sleep(1000);
-	}
+	customer(1,CUSTOMER_1_CHAR_COLOR);
 }
 
 /*======================================================================*
@@ -146,10 +218,7 @@ void Customer_C()
  *======================================================================*/
 void Customer_D()
 {
-	while(1){
-		disp_str_with_color("D.",CUSTOMER_CHAR_COLOR);
-        process_sleep(1000);
-	}
+	customer(2,CUSTOMER_2_CHAR_COLOR);
 }
 
 /*======================================================================*
@@ -157,8 +226,7 @@ void Customer_D()
  *======================================================================*/
 void Customer_E()
 {
-	while(1){
-		disp_str_with_color("E.",CUSTOMER_CHAR_COLOR);
-        process_sleep(1000);
-	}
+	customer(3,CUSTOMER_3_CHAR_COLOR);
 }
+
+

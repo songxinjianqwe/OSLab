@@ -67,3 +67,29 @@ PUBLIC void sys_process_sleep(int mill_seconds){
 PUBLIC void sys_disp_str_with_color(char * info,int color){
 	disp_color_str(info,color);
 }
+/*======================================================================*
+                           sys_disp_str_with_color
+ *======================================================================*/
+PUBLIC void sys_sem_p(Semaphore * semaphore){
+	semaphore->value --;
+	if(semaphore->value < 0){
+		enQueue(semaphore->queue,p_proc_ready);
+		//make current process sleeping
+		//if there is no one process wake up this process,it will sleeping forever
+		p_proc_ready->sleeping = MAX_SLEEP_TIME;
+		schedule();
+	}
+}
+/*======================================================================*
+                           sys_disp_str_with_color
+ *======================================================================*/
+PUBLIC void sys_sem_v(Semaphore * semaphore){
+	semaphore->value ++;
+	if(semaphore->value <= 0){
+		PROCESS * proc = deQueue(semaphore->queue);
+		//make the process which in the top of queue ready
+		proc->sleeping = AWAKE;
+	}
+}
+
+

@@ -4,7 +4,8 @@
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                                                     forrest yu, 2005
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
+#ifndef SLEEPINGBARBER_PROC_H
+#define SLEEPINGBARBER_PROC_H
 
 typedef struct s_stackframe {	/* proc_ptr points here				↑ Low			*/
 	u32	gs;		/* ┓						│			*/
@@ -65,3 +66,5 @@ typedef struct s_task {
 			STACK_SIZE_CUSTOMER_E)
 
 # define AWAKE 0
+
+#endif

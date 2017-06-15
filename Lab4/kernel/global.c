@@ -29,5 +29,5 @@ PUBLIC	TASK	task_table[NR_TASKS] = {{Normal_Proc, STACK_SIZE_NORMAL_PROC, "Norma
 
 PUBLIC	irq_handler		irq_table[NR_IRQ];
 
-PUBLIC	system_call		sys_call_table[NR_SYS_CALL] = {sys_get_ticks,sys_process_sleep,sys_disp_str_with_color};
+PUBLIC	system_call		sys_call_table[NR_SYS_CALL] = {sys_get_ticks,sys_process_sleep,sys_disp_str_with_color,sys_sem_p,sys_sem_v};
 

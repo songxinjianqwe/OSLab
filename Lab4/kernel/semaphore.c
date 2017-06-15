@@ -1,13 +1,18 @@
 //
 // Created by sinjinsong on 6/14/17.
 //
-
+#include "type.h"
+#include "const.h"
+#include "protect.h"
+#include "proto.h"
+#include "string.h"
+#include "proc.h"
+#include "global.h"
 #include "semaphore.h"
-#include "../include/semphore.h"
 
-PUBLIC void init_queue(Queue * queue){
+PRIVATE void initQueue(Queue * queue){
     queue->front = 0;
-    queue->./include/ = 0;
+    queue->rear = 0;
     queue->elements = 0;
 }
 
@@ -32,3 +37,8 @@ PUBLIC PROCESS * deQueue(Queue * queue){
     return result;
 }
 
+PUBLIC void initSemaphore(Semaphore * semaphore,int value,Queue * queue ){
+    initQueue(queue);
+    semaphore->value = value;
+    semaphore->queue = queue;
+}

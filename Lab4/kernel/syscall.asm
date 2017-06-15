@@ -56,7 +56,6 @@ disp_str_with_color:
 sem_p:
    mov eax,_NR_sem_p
    mov ebx, [esp + 4]
-   mov ecx, [esp + 8]
    int INT_VECTOR_SYS_CALL
    ret
 
@@ -66,7 +65,6 @@ sem_p:
 sem_v:
    mov eax,_NR_sem_v
    mov ebx, [esp + 4]
-   mov ecx, [esp + 8]
    int INT_VECTOR_SYS_CALL
    ret
 

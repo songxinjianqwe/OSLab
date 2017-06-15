@@ -62,11 +62,14 @@
 #define	AT_WINI_IRQ	14	/* at winchester */
 
 /* system call */
-#define NR_SYS_CALL     3
+#define NR_SYS_CALL     5
 
 #define NORMAL_CHAR_COLOR	0x07
 #define BARBER_CHAR_COLOR	0x0c
-#define CUSTOMER_CHAR_COLOR	0x0d
+#define CUSTOMER_1_CHAR_COLOR	0x03
+#define CUSTOMER_2_CHAR_COLOR	0x02
+#define CUSTOMER_3_CHAR_COLOR	0x01
+
 
 /* VGA */
 #define	CRTC_ADDR_REG	0x3D4	/* CRT Controller Registers - Addr Register */

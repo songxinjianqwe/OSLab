@@ -1,3 +1,0 @@
-/home/sinjinsong/CLionProjects/SleepingBarber/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/sinjinsong/CLionProjects/SleepingBarber/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/sinjinsong/CLionProjects/SleepingBarber/cmake-build-debug/CMakeFiles/SleepingBarber.dir
