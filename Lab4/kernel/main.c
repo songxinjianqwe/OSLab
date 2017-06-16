@@ -20,7 +20,6 @@ void barber();
 void customer(int customer_id,int color);
 void cut_hair();
 void get_haircut(int color);
-
 /*======================================================================*
                             kernel_main
  *======================================================================*/
@@ -105,7 +104,6 @@ PRIVATE void setCursor() {
 }
 
 /**************************************************************************************************************/
-
 int waiting = 0;
 Semaphore customers;
 Semaphore barbers;
@@ -129,61 +127,57 @@ PRIVATE void initProcess(){
     waiting = 0;
 }
 
+
+
 void barber(){
 	while(1){
 		//print current situation
-//		sem_p(&mutex);
 		if(customers.value < 1){
-			disp_str_with_color("No Customers,Barber is sleeping",BARBER_CHAR_COLOR);
-			disp_str_with_color("\n",BARBER_CHAR_COLOR);
+			disp_str_with_color("No Customers,Barber is sleeping\n",BARBER_CHAR_COLOR);
 		}
-//		sem_v(&mutex);
-
 		sem_p(&customers);
 		sem_p(&mutex);
 		waiting--;
 		sem_v(&barbers);
-		sem_v(&mutex);
-		cut_hair();
-	}
+        sem_v(&mutex);
+        cut_hair();
+    }
 }
+
+void cut_hair(){
+    disp_str_with_color("Barber is cutting hair",BARBER_CHAR_COLOR);
+    disp_str_with_color("\n",BARBER_CHAR_COLOR);
+    process_sleep(2000);
+}
+
 
 void customer(int customer_id,int color){
 	while(1){
-		process_sleep(customer_id * 1000);
+		process_sleep(customer_id * 800);
 		sem_p(&mutex);
-
 		if(waiting < CHAIRS){
 			waiting++;
-
 			disp_str_with_color(p_proc_ready->p_name,color);
 			disp_str_with_color(" is waiting",color);
-			disp_str_with_color("\n",BARBER_CHAR_COLOR);
-			sem_v(&customers);
+            disp_str_with_color("\n",color);
+            sem_v(&customers);
 			sem_v(&mutex);
-			sem_p(&barbers);
-			get_haircut(color);
-		}else{
+            sem_p(&barbers);
+            get_haircut(color);
+        }else{
 			disp_str_with_color(p_proc_ready->p_name,color);
-			disp_str_with_color(" come and leave",color);
-			disp_str_with_color("\n",BARBER_CHAR_COLOR);
-			sem_v(&mutex);
+			disp_str_with_color(" leave and go",color);//magic
+            disp_str_with_color("\n",color);
+            sem_v(&mutex);
 		}
 		p_proc_ready->sleeping = MAX_SLEEP_TIME;
 	}
 }
 
-void cut_hair(){
-	disp_str_with_color("Barber is cutting hair\n",BARBER_CHAR_COLOR);
-    disp_str_with_color("\n",BARBER_CHAR_COLOR);
-    process_sleep(2000);
-}
-
 void get_haircut(int color){
-	disp_str_with_color(p_proc_ready->p_name,color);
-	disp_str_with_color(" got haircut",color);
-	disp_str_with_color("\n",color);
-	process_sleep(2000);
+    disp_str_with_color(p_proc_ready->p_name,color);
+    disp_str_with_color(" got service\n",color);
+    process_sleep(2000);
 }
 
 /*======================================================================*
@@ -193,7 +187,6 @@ void Normal_Proc()
 {
 	int i = 0;
 	while (1) {
-		milli_delay(100);
 	}
 }
 
